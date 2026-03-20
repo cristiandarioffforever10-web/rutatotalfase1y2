@@ -26,10 +26,10 @@ export const PLANES_CONFIG = [
         cta: "Recuperar el Control",
         caracteristicas: [
             "Dashboard Proactivo (Glance-First)",
-            "Gestión de 4 Estados Operativos",
             "Interacción Táctil Drag-and-Drop",
             "Logística Visual por Colores de contraste",
-            "Feedback Auditivo (Motor Tone.js)",
+            "Gestión de 3 Estados Operativos",
+            "Feedback Auditivo",
             "Buscador Mega-Rápido de IDs",
             "Bloqueo de Errores y Duplicados",
             "Centro de Reportes Avanzado",

@@ -80,8 +80,13 @@ export const leadService = {
     async saveChatLead(leadData, history) {
         try {
             const docRef = await addDoc(collection(db, 'leads_inbox'), {
-                ...leadData,
-                history,
+                nombre: leadData.nombre || 'Interesado Anónimo',
+                local: leadData.local || 'Sin Local',
+                flota: leadData.flota || leadData.volume || '?',
+                volume: leadData.volume || '',
+                specialty: leadData.specialty || '',
+                contacto: leadData.contacto || '',
+                plan: leadData.plan || '',
                 timestamp: serverTimestamp(),
                 source: 'chatbot_planes',
                 status: 'new'

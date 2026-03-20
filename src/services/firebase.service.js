@@ -37,7 +37,7 @@ export class FireRouter {
         try {
             await addDoc(collection(this.db, "chat_sessions"), {
                 ...sessionData,
-                savedAt: serverTimestamp()
+                startedAt: serverTimestamp()
             });
         } catch (e) { 
             console.error("Chat log error:", e); 

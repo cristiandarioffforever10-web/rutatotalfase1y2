@@ -1,5 +1,6 @@
 import { BENEFITS_DATA, FAQ_DATA } from "../config/chatbot.config.js";
 import { fireRouter } from "../services/firebase.service.js";
+import { leadService } from "../services/lead.service.js";
 
 /**
  * ChatbotCore (ES6 Module)
@@ -365,6 +366,9 @@ export class ChatbotCore {
             lead: this.data,
             history: this.history
         });
+
+        // Guardar también en la colección de leads_inbox para que aparezca en el pipeline
+        leadService.saveChatLead(this.data, this.history);
 
         if (this.inputArea) {
             this.inputArea.innerHTML = `
