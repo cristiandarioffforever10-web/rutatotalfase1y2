@@ -233,7 +233,15 @@
         <div class="panel">
             <div class="leads-header">
                 <h3><span>📋</span> Base de Datos de Prospectos</h3>
-                <button class="load-btn" onclick="triggerFileUpload()">📁 CARGAR TXT DE LOCALES</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="deliveryFilter" class="load-btn" style="background: var(--card-bg); padding: 4px 8px;" onchange="if(leads.length > 0) loadPizzerias()">
+                        <option value="all">Filtrar: Todos</option>
+                        <option value="+5">> 5 Deliveries</option>
+                        <option value="-5">< 5 Deliveries</option>
+                    </select>
+                    <button class="load-btn" onclick="loadPizzerias()" style="border-color: #ff9f43; color: #ff9f43;">🍕 PIZZERÍAS</button>
+                    <button class="load-btn" onclick="triggerFileUpload()">📁 CARGAR TXT</button>
+                </div>
                 <input type="file" id="fileInput" style="display: none;" accept=".txt" onchange="loadLeadsFromFile(event)">
             </div>
 
@@ -250,6 +258,44 @@
     <script>
         let leads = [];
         let activePitch = null;
+
+        const PRESET_DATA = {
+            pizzerias: [
+                { name: "Empanadas Mi Gusto", phone: "+54 11 4754-0278", niche: "Pizzería", city: "San Martín", deliveries: "+5" },
+                { name: "Empanadas Mi Gusto", phone: "+54 11 4503-4318", niche: "Pizzería", city: "Villa Devoto", deliveries: "+5" },
+                { name: "Empanadas Mi Gusto", phone: "+54 11 4687-1697", niche: "Pizzería", city: "Mataderos", deliveries: "+5" },
+                { name: "Empanadas Mi Gusto", phone: "+54 11 4641-4001", niche: "Pizzería", city: "Villa Luro", deliveries: "+5" },
+                { name: "Gli Amici", phone: "+54 11 3750-5949", niche: "Pizzeria", city: "Ramos Mejía", deliveries: "-5" },
+                { name: "Domenico Pizza", phone: "+54 11 4658-2309", niche: "Pizzeria", city: "Ramos Mejía", deliveries: "-5" },
+                { name: "Santino", phone: "+54 9 11 2429-9577", niche: "Pizzeria", city: "Villa Bosch", deliveries: "-5" },
+                { name: "Pizzería El Barba", phone: "+54 11 4639-6278", niche: "Pizzeria", city: "Monte Castro", deliveries: "-5" },
+                { name: "Pizzería Il Ritorno", phone: "+54 11 4648-1212", niche: "Pizzeria", city: "Monte Castro", deliveries: "-5" }
+            ]
+        };
+
+        function loadPizzerias() {
+            const filterValue = document.getElementById('deliveryFilter').value;
+            let filteredData = PRESET_DATA.pizzerias;
+            
+            if (filterValue !== 'all') {
+                filteredData = filteredData.filter(item => item.deliveries === filterValue);
+            }
+
+            leads = filteredData.map((item, index) => ({
+                id: index,
+                name: item.name,
+                phone: item.phone,
+                whatsapp: item.phone.replace(/\D/g, ''),
+                niche: item.niche,
+                city: item.city,
+                deliveries: item.deliveries,
+                status: 'pendiente'
+            }));
+            
+            renderLeads();
+            logToConsole(`> Filtro aplicado: ${filterValue === 'all' ? 'Todos' : (filterValue === '+5' ? '> 5 deliveries' : '< 5 deliveries')}.`);
+            logToConsole(`> Mostrando ${leads.length} locales.`);
+        }
 
         // Listen for localStorage changes
         window.addEventListener('storage', (e) => {
@@ -343,7 +389,10 @@
                 <div class="lead-card" id="lead-${lead.id}" style="${lead.status === 'enviado' && !isFollowUp ? 'opacity: 0.7;' : ''}">
                     <span class="status-badge" id="status-${lead.id}" style="background: ${lead.status === 'enviado' ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)'}; color: ${lead.status === 'enviado' ? 'var(--success)' : 'var(--text-dim)'}">${lead.status}</span>
                     <div class="lead-name">${lead.name}</div>
-                    <div class="lead-info">📞 ${lead.phone} | 🏷️ ${lead.niche}</div>
+                    <div class="lead-info">
+                        📞 ${lead.phone} | 🏷️ ${lead.niche}<br>
+                        📍 ${lead.city} ${lead.deliveries ? `| 📦 ${lead.deliveries === '+5' ? '>5' : '<5'} Dely` : ''}
+                    </div>
                     <button class="action-send" ${!activePitch ? 'disabled' : ''} onclick="personalizeAndSend(${lead.id})" style="background: ${isFollowUp ? 'var(--success)' : 'var(--accent-bot)'}; color: ${isFollowUp ? 'black' : 'white'}">
                         <span>${isFollowUp ? '🎯 SEGUIMIENTO' : '🚀 ENVIAR PITCH'}</span>
                     </button>
@@ -386,14 +435,6 @@
         // Initial check
         window.onload = () => {
             loadActivePitch();
-            // Test leads (para que veas como queda)
-            /* 
-            leads = [
-                { id: 101, name: "Pizzería Don Julio", phone: "5491122334455", niche: "pizza", status: "pendiente" },
-                { id: 102, name: "Hamburguesas King", phone: "5491199887766", niche: "burger", status: "pendiente" }
-            ];
-            renderLeads();
-            */
         };
     </script>
 </body>
