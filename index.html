@@ -203,14 +203,13 @@
             display: block;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            /* llena el contenedor sin barras negras */
-            object-position: center center;
+            object-fit: contain;
+            /* muestra todo el video sin recortarlo */
+            object-position: center;
             /* centra el encuadre */
-            background: #000;
+            background: transparent;
             border-radius: 12px;
             transition: opacity 0.5s ease;
-
         }
 
         .slider-nav-btn {
@@ -277,6 +276,28 @@
 
         /* Estilos para el polvo - cubre el footer completo */
         #footer-dust-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Estilos para el polvo - sección experiencia (partículas derecha→izquierda) */
+        #experiencia-dust-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Estilos para el polvo - sección antigravidez (partículas arriba→abajo) */
+        #antigravidez-dust-canvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -991,8 +1012,10 @@
     </header>
 
     <!-- RutaTotal 360: El Poder del Monitor -->
-    <section id="experiencia" class="py-24 relative bg-slate-950">
-        <div class="container mx-auto px-6">
+    <section id="experiencia" class="py-24 relative bg-slate-950" style="overflow:hidden;">
+        <!-- Canvas de partículas derecha→izquierda sección experiencia -->
+        <canvas id="experiencia-dust-canvas"></canvas>
+        <div class="container mx-auto px-6" style="position:relative; z-index:1;">
             <div class="mb-20 text-center">
                 <h2 class="reveal text-3xl md:text-5xl font-black italic mb-6">EL PODER DE LA INFORMACIÓN AL INSTANTE
                 </h2>
@@ -1078,6 +1101,8 @@
 
     <!-- Sección Antigravidez: 10 Mandamientos -->
     <section id="antigravidez" class="py-32 relative bg-slate-950 overflow-hidden">
+        <!-- Canvas de partículas arriba→abajo sección antigravidez -->
+        <canvas id="antigravidez-dust-canvas"></canvas>
         <div
             class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-950 to-slate-950">
         </div>
@@ -1475,7 +1500,129 @@
             initDust(); /* reinicializar partículas al cambiar tamaño */
             resizeFooterCanvas();
             initFooterDust();
+            resizeExperienciaCanvas();
+            initExperienciaDust();
+            resizeAntigravidezCanvas();
+            initAntigravidezDust();
         });
+
+        // --- ANTIGRAVIDEZ SECTION PARTICLES (top → bottom) ---
+        const antigravidezCanvas = document.getElementById('antigravidez-dust-canvas');
+        const antigravidezCtx = antigravidezCanvas ? antigravidezCanvas.getContext('2d') : null;
+        let antigravidezParticles = [];
+        const antigravidezSection = document.getElementById('antigravidez');
+
+        function resizeAntigravidezCanvas() {
+            if (!antigravidezSection || !antigravidezCanvas) return;
+            antigravidezCanvas.width = antigravidezSection.offsetWidth;
+            antigravidezCanvas.height = antigravidezSection.offsetHeight;
+        }
+
+        class AntigravidezParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * antigravidezCanvas.width;
+                this.y = Math.random() * antigravidezCanvas.height;
+                this.size = Math.random() * 2 + 0.4;
+                // Movimiento positivo: arriba → abajo
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 1.2;
+                this.opacity = Math.random() * 0.2;
+                // Tonos emerald igual que el footer
+                const r = 10 + Math.floor(Math.random() * 30);
+                const g = 150 + Math.floor(Math.random() * 60);
+                const b = 90 + Math.floor(Math.random() * 40);
+                this.color = `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // Cuando sale por abajo, reaparece por arriba
+                if (this.y > antigravidezCanvas.height + 10) {
+                    this.y = -10;
+                    this.x = Math.random() * antigravidezCanvas.width;
+                }
+                if (this.x < -10) this.x = antigravidezCanvas.width + 10;
+                if (this.x > antigravidezCanvas.width + 10) this.x = -10;
+            }
+            draw() {
+                antigravidezCtx.fillStyle = this.color;
+                antigravidezCtx.beginPath();
+                antigravidezCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                antigravidezCtx.fill();
+            }
+        }
+
+        function initAntigravidezDust() {
+            if (!antigravidezCanvas) return;
+            antigravidezParticles = [];
+            for (let i = 0; i < 90; i++) {
+                antigravidezParticles.push(new AntigravidezParticle());
+            }
+        }
+
+        function animateAntigravidezDust() {
+            if (!antigravidezCtx) return;
+            antigravidezCtx.clearRect(0, 0, antigravidezCanvas.width, antigravidezCanvas.height);
+            antigravidezParticles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateAntigravidezDust);
+        }
+
+        // --- EXPERIENCIA SECTION PARTICLES (right → left) ---
+        const experienciaCanvas = document.getElementById('experiencia-dust-canvas');
+        const experienciaCtx = experienciaCanvas ? experienciaCanvas.getContext('2d') : null;
+        let experienciaParticles = [];
+        const experienciaSection = document.getElementById('experiencia');
+
+        function resizeExperienciaCanvas() {
+            if (!experienciaSection || !experienciaCanvas) return;
+            experienciaCanvas.width = experienciaSection.offsetWidth;
+            experienciaCanvas.height = experienciaSection.offsetHeight;
+        }
+
+        class ExperienciaParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * experienciaCanvas.width;
+                this.y = Math.random() * experienciaCanvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                // Movimiento negativo: derecha → izquierda
+                this.speedX = -(Math.random() * 4 + 1.5);
+                this.speedY = (Math.random() - 0.5) * 0.8;
+                this.opacity = Math.random() * 0.25;
+                this.color = `rgba(${139 + Math.random() * 60}, ${115 + Math.random() * 40}, ${85 + Math.random() * 20}, ${this.opacity})`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // Cuando sale por la izquierda, reaparece por la derecha
+                if (this.x < -10) {
+                    this.x = experienciaCanvas.width + 10;
+                    this.y = Math.random() * experienciaCanvas.height;
+                }
+            }
+            draw() {
+                experienciaCtx.fillStyle = this.color;
+                experienciaCtx.beginPath();
+                experienciaCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                experienciaCtx.fill();
+            }
+        }
+
+        function initExperienciaDust() {
+            if (!experienciaCanvas) return;
+            experienciaParticles = [];
+            for (let i = 0; i < 120; i++) {
+                experienciaParticles.push(new ExperienciaParticle());
+            }
+        }
+
+        function animateExperienciaDust() {
+            if (!experienciaCtx) return;
+            experienciaCtx.clearRect(0, 0, experienciaCanvas.width, experienciaCanvas.height);
+            experienciaParticles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateExperienciaDust);
+        }
 
         // --- FOOTER PARTICLES ---
         function resizeFooterCanvas() {
@@ -1563,6 +1710,16 @@
             resizeCanvas();
             initDust();
             animateDust();
+
+            // Init experiencia section particles (right → left)
+            resizeExperienciaCanvas();
+            initExperienciaDust();
+            animateExperienciaDust();
+
+            // Init antigravidez section particles (top → bottom)
+            resizeAntigravidezCanvas();
+            initAntigravidezDust();
+            animateAntigravidezDust();
 
             // Init footer particles
             resizeFooterCanvas();
