@@ -72,8 +72,8 @@ export class ChatbotCore {
                 { text: "¡Es un caos total!", value: "caos" },
                 { text: "Quiero escalar mis ventas.", value: "escalar" },
                 { text: "Solo estoy curioseando.", value: "curioso" },
-                { text: "Beneficios", value: "beneficios" },
-                { text: "Dudas", value: "dudas" }
+                { text: "¿Dudas?", value: "dudas" },
+                { text: "Beneficios", value: "beneficios" }
             ]);
         }, 800);
     }
@@ -110,7 +110,16 @@ export class ChatbotCore {
 
         options.forEach(opt => {
             const btn = document.createElement('button');
-            btn.className = "w-full text-left bg-white/5 hover:bg-emerald-600/20 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl text-xs font-bold text-slate-300 transition-all transform hover:scale-[1.02] active:scale-95";
+            
+            // Estilo dinámico: Verde para Beneficios/Dudas, Slate para el resto
+            const isHighlight = ['beneficios', 'dudas'].includes(opt.value);
+            
+            if (isHighlight) {
+                btn.className = "w-full text-left bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/40 hover:border-emerald-500/70 p-3 rounded-xl text-xs font-bold text-emerald-400 transition-all transform hover:scale-[1.02] active:scale-95";
+            } else {
+                btn.className = "w-full text-left bg-white/5 hover:bg-emerald-600/20 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl text-xs font-bold text-slate-300 transition-all transform hover:scale-[1.02] active:scale-95";
+            }
+
             btn.innerHTML = opt.text;
             btn.onclick = () => this.handleSelection(opt);
             grid.appendChild(btn);

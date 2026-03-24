@@ -241,6 +241,7 @@
                     </select>
                     <button class="load-btn" onclick="loadPizzerias()" style="border-color: #ff9f43; color: #ff9f43;">🍕 PIZZERÍAS</button>
                     <button class="load-btn" onclick="triggerFileUpload()">📁 CARGAR TXT</button>
+                    <a href="outreach-kanban.html" class="load-btn" style="border-color: #00f2ff; color: #00f2ff; text-decoration: none;">📊 KANBAN OUTREACH</a>
                 </div>
                 <input type="file" id="fileInput" style="display: none;" accept=".txt" onchange="loadLeadsFromFile(event)">
             </div>
@@ -429,7 +430,34 @@
                 document.getElementById(`status-${leadId}`).style.color = 'var(--success)';
                 
                 logToConsole(`> Canal abierto con ${lead.name}. Verificación de envío pendiente.`);
+
+                // REGISTER CONTACT FOR KANBAN - Passing the full personalized text
+                registerContact(lead, personalizedText);
             }, 300);
+        }
+
+        function registerContact(lead, fullMessage) {
+            // Check if already registered
+            let currentContacts = JSON.parse(localStorage.getItem('rt360_outreach_contacts') || '[]');
+            
+            const alreadyExists = currentContacts.find(c => c.phone === lead.phone);
+            if (alreadyExists) return;
+
+            const newContact = {
+                id: `ot_${Date.now()}`,
+                name: lead.name,
+                phone: lead.phone,
+                niche: lead.niche,
+                city: lead.city,
+                status: 'contacted',
+                timestamp: new Date().toISOString(),
+                trigger_message: fullMessage || '', // Store the message that triggered the contact
+                source: 'Comandante Outreach'
+            };
+
+            currentContacts.push(newContact);
+            localStorage.setItem('rt360_outreach_contacts', JSON.stringify(currentContacts));
+            logToConsole(`> Lead registrado en el Kanban de Outreach.`);
         }
 
         // Initial check
